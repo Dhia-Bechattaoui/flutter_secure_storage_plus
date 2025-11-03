@@ -47,11 +47,6 @@ android {
         minSdk = 21
     }
 
-    dependencies {
-        testImplementation("org.jetbrains.kotlin:kotlin-test")
-        testImplementation("org.mockito:mockito-core:5.0.0")
-    }
-
     testOptions {
         unitTests.all {
             useJUnitPlatform()
@@ -63,4 +58,10 @@ android {
             }
         }
     }
+}
+
+dependencies {
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.mockito:mockito-core:5.0.0")
 }

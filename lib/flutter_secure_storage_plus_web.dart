@@ -9,11 +9,16 @@ import 'package:web/web.dart' as web;
 import 'flutter_secure_storage_plus_platform_interface.dart';
 
 /// Web implementation of [FlutterSecureStoragePlusPlatform].
+///
+/// Note: Web storage using localStorage is not as secure as native keychain/keystore
+/// implementations. Data is stored in the browser's localStorage which is accessible
+/// to JavaScript on the same origin. For production applications handling sensitive
+/// data, consider using additional encryption layers or server-side storage.
 class FlutterSecureStoragePlusWeb extends FlutterSecureStoragePlusPlatform {
   /// Constructs a FlutterSecureStoragePlusWeb
   FlutterSecureStoragePlusWeb();
 
-  static final Map<String, String> _memoryStore = {};
+  static const String _storagePrefix = 'flutter_secure_storage_plus_';
 
   static void registerWith(Registrar registrar) {
     FlutterSecureStoragePlusPlatform.instance = FlutterSecureStoragePlusWeb();
@@ -26,22 +31,42 @@ class FlutterSecureStoragePlusWeb extends FlutterSecureStoragePlusPlatform {
     return version;
   }
 
+  /// Gets the storage key with prefix
+  String _getStorageKey(String key) {
+    return '$_storagePrefix$key';
+  }
+
   @override
   Future<void> write({
     required String key,
     required String value,
     bool? requireBiometrics,
   }) async {
-    _memoryStore[key] = value;
+    try {
+      final storageKey = _getStorageKey(key);
+      web.window.localStorage.setItem(storageKey, value);
+    } catch (e) {
+      throw Exception('Failed to write to localStorage: $e');
+    }
   }
 
   @override
   Future<String?> read({required String key, bool? requireBiometrics}) async {
-    return _memoryStore[key];
+    try {
+      final storageKey = _getStorageKey(key);
+      return web.window.localStorage.getItem(storageKey);
+    } catch (e) {
+      throw Exception('Failed to read from localStorage: $e');
+    }
   }
 
   @override
   Future<void> delete({required String key}) async {
-    _memoryStore.remove(key);
+    try {
+      final storageKey = _getStorageKey(key);
+      web.window.localStorage.removeItem(storageKey);
+    } catch (e) {
+      throw Exception('Failed to delete from localStorage: $e');
+    }
   }
 }

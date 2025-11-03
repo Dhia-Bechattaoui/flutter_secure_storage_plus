@@ -2,12 +2,15 @@ package com.dhiabechattaoui.flutter_secure_storage_plus
 
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.io.IOException
+import java.security.GeneralSecurityException
 
 /** FlutterSecureStoragePlusPlugin */
 class FlutterSecureStoragePlusPlugin: FlutterPlugin, MethodCallHandler {
@@ -21,8 +24,27 @@ class FlutterSecureStoragePlusPlugin: FlutterPlugin, MethodCallHandler {
     context = flutterPluginBinding.applicationContext
   }
 
+  private fun getEncryptedPrefs(): android.content.SharedPreferences? {
+    return try {
+      val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
+      EncryptedSharedPreferences.create(
+        context,
+        prefsName,
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+      )
+    } catch (e: GeneralSecurityException) {
+      null
+    } catch (e: IOException) {
+      null
+    }
+  }
+
   override fun onMethodCall(call: MethodCall, result: Result) {
-    val prefs: SharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
     when (call.method) {
       "getPlatformVersion" -> {
         result.success("Android ${android.os.Build.VERSION.RELEASE}")
@@ -34,6 +56,11 @@ class FlutterSecureStoragePlusPlugin: FlutterPlugin, MethodCallHandler {
           result.error("INVALID_ARGUMENT", "Key and value are required", null)
           return
         }
+        val prefs = getEncryptedPrefs()
+        if (prefs == null) {
+          result.error("STORAGE_ERROR", "Failed to initialize secure storage", null)
+          return
+        }
         prefs.edit().putString(key, value).apply()
         result.success(null)
       }
@@ -43,6 +70,11 @@ class FlutterSecureStoragePlusPlugin: FlutterPlugin, MethodCallHandler {
           result.error("INVALID_ARGUMENT", "Key is required", null)
           return
         }
+        val prefs = getEncryptedPrefs()
+        if (prefs == null) {
+          result.error("STORAGE_ERROR", "Failed to initialize secure storage", null)
+          return
+        }
         val value = prefs.getString(key, null)
         result.success(value)
       }
@@ -50,6 +82,11 @@ class FlutterSecureStoragePlusPlugin: FlutterPlugin, MethodCallHandler {
         val key = call.argument<String>("key")
         if (key == null) {
           result.error("INVALID_ARGUMENT", "Key is required", null)
+          return
+        }
+        val prefs = getEncryptedPrefs()
+        if (prefs == null) {
+          result.error("STORAGE_ERROR", "Failed to initialize secure storage", null)
           return
         }
         prefs.edit().remove(key).apply()

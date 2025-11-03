@@ -1,6 +1,6 @@
 name: flutter_secure_storage_plus
 description: Enhanced secure storage with biometric unlock and key rotation.
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/Dhia-Bechattaoui/flutter_secure_storage_plus
 repository: https://github.com/Dhia-Bechattaoui/flutter_secure_storage_plus
 issue_tracker: https://github.com/Dhia-Bechattaoui/flutter_secure_storage_plus/issues
@@ -10,8 +10,8 @@ funding:
   - https://github.com/sponsors/Dhia-Bechattaoui
 
 environment:
-  sdk: ^3.8.1
-  flutter: ">=3.22.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -27,11 +27,11 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 topics:
-  - security
-  - storage
-  - biometrics
-  - keychain
-  - keystore
+  - flutter
+  - dart
+  - cross-platform
+  - utility
+  - tools
 
 false_secrets:
   - /example/**

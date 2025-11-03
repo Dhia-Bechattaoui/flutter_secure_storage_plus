@@ -49,7 +49,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_secure_storage_plus: ^0.0.4
+  flutter_secure_storage_plus: ^0.0.5
 ```
 
 ## Usage
@@ -65,6 +65,10 @@ Future<void> example() async {
   print(token);
 }
 ```
+
+## Example
+
+<img src="assets/example.gif" width="300" alt="Example usage of flutter_secure_storage_plus">
 
 API surface is evolving; see examples and docs as features land.
 
